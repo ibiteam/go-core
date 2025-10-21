@@ -7,7 +7,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.uber.org/zap v1.27.0
-	gorm.io/gorm v1.31.0
+	gorm.io/gorm v1.30.1
 )
 
 require (
