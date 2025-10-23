@@ -1,4 +1,4 @@
-package filesystem
+package driver
 
 import (
 	"context"
@@ -7,32 +7,29 @@ import (
 	"mime/multipart"
 	"strings"
 
+	"github.com/ibiteam/go-core/filesystem/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 type Minio struct {
-	AccessKey    string
-	AccessSecret string
-	Domain       string
-	Endpoint     string
-	Bucket       string
+	config config.MinioConfig
 }
 
-func NewMinio(accessKey string, accessSecret string, domain string, endpoint string, bucket string) *Minio {
-	return &Minio{
-		AccessKey:    accessKey,
-		AccessSecret: accessSecret,
-		Domain:       domain,
-		Endpoint:     endpoint,
-		Bucket:       bucket,
+func NewMinio(cfg *config.MinioConfig) (*Minio, error) {
+	if cfg == nil {
+		return nil, errors.New("Minio config is required")
 	}
+	if cfg.AccessKey == "" || cfg.AccessSecret == "" {
+		return nil, errors.New("Minio access key and secret are required")
+	}
+	return &Minio{config: *cfg}, nil
 }
 
 func (m Minio) PutFile(file *multipart.FileHeader, dirPath string, filename string) (string, error) {
 	// 初始化 MinIO 客户端
-	minioClient, err := minio.New(m.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(m.AccessKey, m.AccessSecret, ""),
+	minioClient, err := minio.New(m.config.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(m.config.AccessKey, m.config.AccessSecret, ""),
 		Secure: false, // 不使用 HTTPS
 	})
 	if err != nil {
@@ -54,7 +51,7 @@ func (m Minio) PutFile(file *multipart.FileHeader, dirPath string, filename stri
 	// 上传到 MinIO
 	_, err = minioClient.PutObject(
 		context.Background(),
-		m.Bucket,
+		m.config.Bucket,
 		newFilePath,
 		fileStream,
 		file.Size,
@@ -65,10 +62,10 @@ func (m Minio) PutFile(file *multipart.FileHeader, dirPath string, filename stri
 	}
 
 	// 如果配置了自定义域名
-	if m.Domain != "" {
-		return fmt.Sprintf("http://%s/%s/%s", m.Domain, m.Bucket, newFilePath), nil
+	if m.config.Domain != "" {
+		return fmt.Sprintf("http://%s/%s/%s", m.config.Domain, m.config.Bucket, newFilePath), nil
 	}
 
 	// 使用默认的 MinIO 地址
-	return fmt.Sprintf("http://%s/%s/%s", m.Endpoint, m.Bucket, newFilePath), nil
+	return fmt.Sprintf("http://%s/%s/%s", m.config.Endpoint, m.config.Bucket, newFilePath), nil
 }

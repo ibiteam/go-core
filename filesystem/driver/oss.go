@@ -1,4 +1,4 @@
-package filesystem
+package driver
 
 import (
 	"context"
@@ -10,26 +10,21 @@ import (
 
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
+	"github.com/ibiteam/go-core/filesystem/config"
 )
 
 type Oss struct {
-	AccessKey    string
-	AccessSecret string
-	Domain       string
-	Endpoint     string
-	Region       string
-	Bucket       string
+	config config.OssConfig
 }
 
-func NewOss(accessKey string, accessSecret string, domain string, endpoint string, region string, bucket string) *Oss {
-	return &Oss{
-		AccessKey:    accessKey,
-		AccessSecret: accessSecret,
-		Domain:       domain,
-		Endpoint:     endpoint,
-		Region:       region,
-		Bucket:       bucket,
+func NewOss(cfg *config.OssConfig) (*Oss, error) {
+	if cfg == nil {
+		return nil, errors.New("OSS config is required")
 	}
+	if cfg.AccessKey == "" || cfg.AccessSecret == "" {
+		return nil, errors.New("OSS access key and secret are required")
+	}
+	return &Oss{config: *cfg}, nil
 }
 
 func (o Oss) PutFile(file *multipart.FileHeader, dirPath string, filename string) (string, error) {
@@ -50,11 +45,11 @@ func (o Oss) PutFile(file *multipart.FileHeader, dirPath string, filename string
 		   - 如需采用 HTTP 协议，请在指定域名时指定为 HTTP，例如：'http://oss-cn-hangzhou.aliyuncs.com'
 	*/
 	cfg := oss.LoadDefaultConfig().
-		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(o.AccessKey, o.AccessSecret)).
-		WithRegion(o.Region)
+		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(o.config.AccessKey, o.config.AccessSecret)).
+		WithRegion(o.config.Region)
 
-	if o.Endpoint != "" {
-		cfg = cfg.WithEndpoint(o.Endpoint)
+	if o.config.Endpoint != "" {
+		cfg = cfg.WithEndpoint(o.config.Endpoint)
 	}
 
 	client := oss.NewClient(cfg)
@@ -71,7 +66,7 @@ func (o Oss) PutFile(file *multipart.FileHeader, dirPath string, filename string
 	newFilePath := fmt.Sprintf("%s/%s", strings.TrimRight(dirPath, "/"), filename)
 
 	uploadRequest := &oss.PutObjectRequest{
-		Bucket: oss.Ptr(o.Bucket),
+		Bucket: oss.Ptr(o.config.Bucket),
 		Key:    oss.Ptr(newFilePath),
 		Body:   fileStream,
 	}
@@ -83,8 +78,8 @@ func (o Oss) PutFile(file *multipart.FileHeader, dirPath string, filename string
 		return "", errors.New("上传文件失败！")
 	}
 
-	if o.Domain != "" {
-		return fmt.Sprintf("https://%s/%s", o.Domain, newFilePath), nil
+	if o.config.Domain != "" {
+		return fmt.Sprintf("https://%s/%s", o.config.Domain, newFilePath), nil
 	}
-	return fmt.Sprintf("https://%s.%s/%s", o.Bucket, o.Endpoint, newFilePath), nil
+	return fmt.Sprintf("https://%s.%s/%s", o.config.Bucket, o.config.Endpoint, newFilePath), nil
 }
