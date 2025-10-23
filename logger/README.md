@@ -5,24 +5,19 @@
 #### 处理model
 ```
 import (
-	GoCoreLogger "github.com/ibiteam/go-core/logger"
+	"github.com/ibiteam/go-core/logger"
 )
-// 记录日志
-data := map[string]string{
-    "key": "value",
-}
-logger.Info("info", GoCoreLogger.Stack(), GoCoreLogger.DictFields(data))
+logger.model.ErrorLog{}
 ```
 
 #### 初始化日志模块并记录日志
 ```
 import (
-	GoCoreLogger "github.com/ibiteam/go-core/logger"
+	"github.com/ibiteam/go-core/logger"
 )
 // 初始化日志模块
-logger, _ := GoCoreLogger.NewLogger(Config{
-    Level:         "info",
-    OutputModes:   []string{"console", "file"},
+logger.Initialize(Config{
+    OutputMode:   "console",
     ConsoleConfig: ConsoleConfig{Colorful: true},
     GormConfig:    GormConfig{Db: DB},
     FileConfig: FileConfig{
@@ -37,5 +32,5 @@ logger, _ := GoCoreLogger.NewLogger(Config{
 data := map[string]string{
     "key": "value",
 }
-logger.Info("info", GoCoreLogger.Stack(), GoCoreLogger.DictFields(data))
+logger.Info("info", logger.Stack(), logger.DictFields(data))
 ```

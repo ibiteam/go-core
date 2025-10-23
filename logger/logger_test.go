@@ -2,18 +2,12 @@ package logger
 
 import (
 	"testing"
-
-	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func TestInfo(t *testing.T) {
-
-	logger, _ := NewLogger(Config{
-		OutputModes:   []string{"console", "file"},
+func setup() {
+	Initialize(Config{
+		OutputMode:    "console",
 		ConsoleConfig: ConsoleConfig{Colorful: true},
-		GormConfig:    GormConfig{Db: DB},
 		FileConfig: FileConfig{
 			Filename:   "./logs/app.log",
 			MaxSize:    64,
@@ -23,8 +17,28 @@ func TestInfo(t *testing.T) {
 			LocalTime:  true,
 		},
 	})
+}
+
+func TestInfo(t *testing.T) {
+	setup()
+
+	Info("info")
+}
+
+func TestError(t *testing.T) {
+	setup()
+
 	data := map[string]string{
 		"key": "value",
 	}
-	logger.Info("info", Stack(), DictFields(data))
+	Error("info", Stack(), DictFields(data))
+}
+
+func TestWarn(t *testing.T) {
+	setup()
+
+	data := map[string]string{
+		"key": "value",
+	}
+	Warn("Warn", Stack(), DictFields(data))
 }

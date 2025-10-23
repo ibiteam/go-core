@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 // Config 日志全局配置
 type Config struct {
-	OutputModes   []string      // 输出模式: console, file, gorm
+	OutputMode    string        // 输出模式: console, file, gorm
 	ConsoleConfig ConsoleConfig // 命令行配置
 	FileConfig    FileConfig    // 文件配置
 	GormConfig    GormConfig
