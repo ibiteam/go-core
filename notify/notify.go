@@ -1,11 +1,11 @@
-package webhook
+package notify
 
 import (
 	"fmt"
 	"sync"
 
-	"github.com/ibiteam/go-core/webhook/driver"
-	"github.com/ibiteam/go-core/webhook/message"
+	"github.com/ibiteam/go-core/notify/driver"
+	"github.com/ibiteam/go-core/notify/message"
 )
 
 // Notifier 通知器，用户的主要交互对象

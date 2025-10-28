@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ibiteam/go-core/webhook/config"
-	"github.com/ibiteam/go-core/webhook/message"
+	"github.com/ibiteam/go-core/notify/config"
+	"github.com/ibiteam/go-core/notify/message"
 )
 
 // FeiShu 飞书驱动

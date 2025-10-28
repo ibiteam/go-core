@@ -3,7 +3,7 @@ package driver
 import (
 	"fmt"
 
-	"github.com/ibiteam/go-core/webhook/message"
+	"github.com/ibiteam/go-core/notify/message"
 )
 
 // Driver 定义驱动接口，每个平台需实现此接口

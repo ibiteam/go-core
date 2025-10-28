@@ -1,10 +1,10 @@
-package webhook
+package notify
 
 import (
 	"testing"
 
-	"github.com/ibiteam/go-core/webhook/config"
-	"github.com/ibiteam/go-core/webhook/driver"
+	"github.com/ibiteam/go-core/notify/config"
+	"github.com/ibiteam/go-core/notify/driver"
 )
 
 func TestSendText(t *testing.T) {
