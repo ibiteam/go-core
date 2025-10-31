@@ -75,7 +75,7 @@ func getCoreTee(cfg Config) zapcore.Core {
 			panic("配置日志驱动失败,当选择数据库驱动时，请配置数据库连接")
 		}
 
-		databaseCore := core.NewGormCore(zapcore.NewJSONEncoder(encoderConfig), cfg.GormConfig.Db, level)
+		databaseCore := core.NewGormCore(zapcore.NewJSONEncoder(encoderConfig), cfg.GormConfig.Db, cfg.GormConfig.LogModel, level)
 
 		cores = append(cores, databaseCore)
 	}

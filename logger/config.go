@@ -1,6 +1,9 @@
 package logger
 
-import "gorm.io/gorm"
+import (
+	"github.com/ibiteam/go-core/logger/model"
+	"gorm.io/gorm"
+)
 
 // Config 日志全局配置
 type Config struct {
@@ -26,5 +29,6 @@ type FileConfig struct {
 }
 
 type GormConfig struct {
-	Db *gorm.DB
+	Db       *gorm.DB
+	LogModel model.CustomModelInterface
 }

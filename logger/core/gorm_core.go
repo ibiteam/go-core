@@ -17,13 +17,14 @@ type GormCore struct {
 }
 
 // NewGormCore 创建实时写入的GORM Core
-func NewGormCore(encoder zapcore.Encoder, db *gorm.DB, level zapcore.LevelEnabler) zapcore.Core {
-	loggerWriter := zapcore.AddSync(&DBWriteSyncer{DB: db})
+func NewGormCore(encoder zapcore.Encoder, db *gorm.DB, logModel model.CustomModelInterface, level zapcore.LevelEnabler) zapcore.Core {
+	loggerWriter := zapcore.AddSync(&DBWriteSyncer{DB: db, Model: logModel})
 	return zapcore.NewCore(encoder, loggerWriter, level)
 }
 
 type DBWriteSyncer struct {
-	DB *gorm.DB
+	DB    *gorm.DB
+	Model model.CustomModelInterface
 }
 
 func (d *DBWriteSyncer) Write(p []byte) (n int, err error) {
@@ -44,17 +45,25 @@ func (d *DBWriteSyncer) Write(p []byte) (n int, err error) {
 		return 0, err
 	}
 	level, _ := jsonData["level"].(string)
-	var errorLog = model.ErrorLog{
-		Message:   message,
-		Caller:    stacktrace,
-		Level:     level,
-		Fields:    string(fieldsBytes),
-		Timestamp: logTime,
-	}
 
-	err = d.DB.Create(&errorLog).Error
-	// 实现将日志数据写入数据库的逻辑
-	return int(errorLog.ID), nil
+	if d.Model != nil {
+		d.Model.SetLogData(message, level, stacktrace, string(fieldsBytes), logTime)
+		var data = d.Model
+		err = d.DB.Create(data).Error
+		return 1, err
+	} else {
+		var errorLog = model.ErrorLog{
+			Message:   message,
+			Caller:    stacktrace,
+			Level:     level,
+			Fields:    string(fieldsBytes),
+			Timestamp: logTime,
+		}
+
+		err = d.DB.Create(&errorLog).Error
+		// 实现将日志数据写入数据库的逻辑
+		return int(errorLog.ID), nil
+	}
 }
 
 func (d *DBWriteSyncer) Sync() error {
