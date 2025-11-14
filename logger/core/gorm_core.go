@@ -40,7 +40,7 @@ func (d *DBWriteSyncer) Write(p []byte) (n int, err error) {
 	message, _ := jsonData["message"].(string)
 	stacktrace, _ := jsonData["stacktrace"].(string)
 	timestamp, _ := jsonData["time"].(string)
-	logTime, err := time.Parse("2006-01-02 15:04:05", timestamp)
+	logTime, err := time.ParseInLocation("2006-01-02 15:04:05", timestamp, time.Local)
 	if err != nil {
 		return 0, err
 	}
